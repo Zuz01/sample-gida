@@ -9,8 +9,8 @@ datasource db {
 }
 
 model Landlord {
-  id              String     @id 
-  email           String     @unique
+  id              String    @id 
+  email           String    @unique
   name            String?
   phoneNumber     String?
   
@@ -31,7 +31,6 @@ model Landlord {
   createdAt       DateTime   @default(now())
 }
 
-
 model Property {
   id          String        @id @default(uuid())
   name        String
@@ -41,7 +40,7 @@ model Property {
   landlordId  String
   landlord    Landlord      @relation(fields: [landlordId], references: [id])
   units       Unit[]
-  maintenance Maintenance[] // <--- ADDED RELATION
+  maintenance Maintenance[] // Relation to Maintenance
   createdAt   DateTime      @default(now())
 }
 
@@ -62,31 +61,31 @@ model Unit {
   
   payments             Payment[]
   leases               Lease[]
-  maintenance          Maintenance[] // <--- ADDED RELATION
+  maintenance          Maintenance[] // Relation to Maintenance
   createdAt            DateTime      @default(now())
 }
 
 model Payment {
-  id          String   @id @default(uuid())
-  amount      Decimal
-  status      String   
-  reference   String   @unique
-  paidAt      DateTime @default(now())
+  id        String   @id @default(uuid())
+  amount    Decimal
+  status    String   
+  reference String   @unique
+  paidAt    DateTime @default(now())
   
-  unitId      String
-  unit        Unit     @relation(fields: [unitId], references: [id])
+  unitId    String
+  unit      Unit     @relation(fields: [unitId], references: [id])
 }
 
 model Tenant {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   email       String?
   phoneNumber String?
-  nationalId  String?    
+  nationalId  String?  
   landlordId  String
-  landlord    Landlord   @relation(fields: [landlordId], references: [id])
+  landlord    Landlord @relation(fields: [landlordId], references: [id])
   leases      Lease[]
-  createdAt   DateTime   @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Lease {
