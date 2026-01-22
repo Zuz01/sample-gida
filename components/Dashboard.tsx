@@ -1555,71 +1555,73 @@ const Dashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
 
 
       {activeSettingsTab === 'Billing' && (
-
         <div className="space-y-8 max-w-6xl">
-
+           {/* Current Plan Banner */}
            <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
-
               <div className="p-8 md:p-12 bg-gradient-to-r from-[#E67E22] to-[#F39C12] text-white relative overflow-hidden">
-
                  <div className="relative z-10">
-
                     <div className="flex items-center gap-3 mb-4"><p className="text-xs font-black uppercase tracking-[0.2em] bg-white/20 px-3 py-1 rounded-lg">Current Plan</p><p className="text-xs font-black uppercase tracking-[0.2em] bg-white/90 text-[#E67E22] px-3 py-1 rounded-lg">{profile?.planStatus || 'Trial'}</p></div>
-
                     <h3 className="text-4xl font-black mb-2">{profile?.plan || 'Starter'}</h3>
-
                     <p className="text-orange-100 font-medium mb-0">Up to 10 units • 2 properties</p>
-
                  </div>
-
                  <div className="absolute top-1/2 right-8 -translate-y-1/2 text-right hidden sm:block z-10"><p className="text-5xl font-black mb-1">₦ 500</p><p className="text-orange-100 font-medium">/month</p></div>
-
                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
-
               </div>
-
               <div className="p-8 md:p-10 flex flex-col sm:flex-row justify-between items-center gap-6">
-
                  <div><p className="text-sm font-bold text-gray-500 uppercase mb-1">Status</p><p className="font-bold text-gray-900 text-lg uppercase">{profile?.planStatus}</p></div>
-
                  <button className="bg-white border-2 border-gray-200 text-gray-700 px-8 py-3 rounded-xl font-bold hover:border-gray-300 hover:bg-gray-50 transition-all flex items-center gap-2"><CreditCard size={18}/> Manage Billing</button>
-
               </div>
-
            </div>
 
+           {/* Plans Grid */}
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
-
-              <div className="bg-white rounded-[32px] border border-gray-100 p-8 hover:shadow-xl transition-all text-center">
-
-                 <h4 className="font-bold text-gray-900 mb-2">Starter</h4><div className="text-4xl font-black text-gray-900 mb-6">KES 500<span className="text-sm text-gray-400">/mo</span></div>
-
-                 <button onClick={() => handleUpgradePlan('Starter', 500)} className="w-full bg-[#FFF5ED] text-[#E67E22] py-4 rounded-xl font-bold">Select Plan</button>
-
+              {/* Starter Plan */}
+              <div className="bg-white rounded-[32px] border border-gray-100 p-8 hover:shadow-xl transition-all">
+                 <div className="text-center mb-8">
+                    <h4 className="font-bold text-gray-900 mb-2">Starter</h4>
+                    <p className="text-xs text-gray-400 mb-6">For small landlords</p>
+                    <div className="text-4xl font-black text-gray-900 mb-1">₦ 1,500<span className="text-sm text-gray-400 font-medium">/mo</span></div>
+                 </div>
+                 <div className="space-y-4 mb-8">
+                    {['Manage up to 5 Units', 'Basic Tenant Database', 'Manual Payments', 'Email Support'].map((f, i) => (
+                       <div key={i} className="flex items-center gap-3 text-sm text-gray-600"><CheckCircle2 size={16} className="text-[#E67E22] shrink-0" /> {f}</div>
+                    ))}
+                 </div>
+                 <button onClick={() => handleUpgradePlan('Starter', 1500)} className="w-full bg-[#FFF5ED] text-[#E67E22] py-4 rounded-xl font-bold hover:bg-[#E67E22] hover:text-white transition-all">Select Plan</button>
               </div>
 
-              <div className="bg-white rounded-[32px] border-2 border-[#E67E22] p-8 shadow-2xl relative transform md:-translate-y-4 text-center">
-
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E67E22] text-white px-4 py-1 rounded-full text-xs font-bold">RECOMMENDED</div>
-
-                 <h4 className="font-bold text-gray-900 mb-2 pt-2">Growth</h4><div className="text-4xl font-black text-gray-900 mb-6">KES 1,500<span className="text-sm text-gray-400">/mo</span></div>
-
-                 <button onClick={() => handleUpgradePlan('Growth', 1500)} className="w-full bg-[#E67E22] text-white py-4 rounded-xl font-bold">Select Plan</button>
-
+              {/* Growth Plan */}
+              <div className="bg-white rounded-[32px] border-2 border-[#E67E22] p-8 shadow-2xl relative transform md:-translate-y-4">
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E67E22] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm">Recommended</div>
+                 <div className="text-center mb-8 pt-2">
+                    <h4 className="font-bold text-gray-900 mb-2">Growth</h4>
+                    <p className="text-xs text-gray-400 mb-6">For growing portfolios</p>
+                    <div className="text-4xl font-black text-gray-900 mb-1">₦ 5,000<span className="text-sm text-gray-400 font-medium">/mo</span></div>
+                 </div>
+                 <div className="space-y-4 mb-8">
+                    {['Manage up to 20 Units', 'SMS Rent Reminders', 'Virtual Bank Accounts', 'Maintenance Tracking', 'Legal Templates'].map((f, i) => (
+                       <div key={i} className="flex items-center gap-3 text-sm text-gray-600"><CheckCircle2 size={16} className="text-[#E67E22] shrink-0" /> {f}</div>
+                    ))}
+                 </div>
+                 <button onClick={() => handleUpgradePlan('Growth', 5000)} className="w-full bg-[#E67E22] text-white py-4 rounded-xl font-bold shadow-lg shadow-orange-200 hover:bg-[#D35400] transition-all">Select Plan</button>
               </div>
 
-              <div className="bg-white rounded-[32px] border border-gray-100 p-8 hover:shadow-xl transition-all text-center">
-
-                 <h4 className="font-bold text-gray-900 mb-2">Premium</h4><div className="text-4xl font-black text-gray-900 mb-6">KES 3,500<span className="text-sm text-gray-400">/mo</span></div>
-
-                 <button onClick={() => handleUpgradePlan('Premium', 3500)} className="w-full bg-white border border-gray-200 text-gray-900 py-4 rounded-xl font-bold">Select Plan</button>
-
+              {/* Premium Plan */}
+              <div className="bg-white rounded-[32px] border border-gray-100 p-8 hover:shadow-xl transition-all">
+                 <div className="text-center mb-8">
+                    <h4 className="font-bold text-gray-900 mb-2">Premium</h4>
+                    <p className="text-xs text-gray-400 mb-6">Unlimited access</p>
+                    <div className="text-4xl font-black text-gray-900 mb-1">₦ 15,000<span className="text-sm text-gray-400 font-medium">/mo</span></div>
+                 </div>
+                 <div className="space-y-4 mb-8">
+                    {['Unlimited Units', 'Multi-User Access', 'Priority Support', 'Dedicated Manager', 'API Access'].map((f, i) => (
+                       <div key={i} className="flex items-center gap-3 text-sm text-gray-600"><CheckCircle2 size={16} className="text-[#E67E22] shrink-0" /> {f}</div>
+                    ))}
+                 </div>
+                 <button onClick={() => handleUpgradePlan('Premium', 15000)} className="w-full bg-white border border-gray-200 text-gray-900 py-4 rounded-xl font-bold hover:border-gray-400 transition-all">Select Plan</button>
               </div>
-
            </div>
-
         </div>
-
       )}
 
 
