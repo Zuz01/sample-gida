@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Building2, Wallet, Users, BarChart3, ShieldCheck } from 'lucide-react';
 import gsap from 'gsap';
@@ -51,17 +50,18 @@ const FeatureCard: React.FC<FeatureCardProps & { index: number }> = ({ icon, tit
 
   return (
     <div ref={cardRef} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-orange-100 hover:shadow-xl hover:shadow-orange-50 transition-all flex flex-col items-start gap-4 h-full">
-    <div className="bg-[#FFF5ED] p-3 rounded-2xl text-[#E67E22]">
-      {icon}
-    </div>
-    <h3 className="text-xl font-bold text-[#1A1A1A]">{title}</h3>
-    <p className="text-gray-500 leading-relaxed text-sm md:text-base">{description}</p>
+      <div className="bg-[#FFF5ED] p-3 rounded-2xl text-[#E67E22]">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-[#1A1A1A]">{title}</h3>
+      <p className="text-gray-500 leading-relaxed text-sm md:text-base">{description}</p>
     </div>
   );
 };
 
 const Features: React.FC = () => {
   const headingRef = useRef<HTMLHeadingElement>(null);
+
   const features = [
     {
       icon: <Building2 size={24} />,
@@ -88,6 +88,8 @@ const Features: React.FC = () => {
       title: "Secure & Isolated",
       description: "Multi-tenant architecture ensures complete data isolation between landlords."
     }
+  ];
+
   useEffect(() => {
     if (!headingRef.current) return;
 
@@ -101,15 +103,13 @@ const Features: React.FC = () => {
       y: 30,
       opacity: 0,
       ease: 'power2.out'
-    });index={index} 
+    });
   }, []);
 
   return (
     <section className="py-24 px-6 md:px-12 bg-white max-w-7xl mx-auto">
       <div className="text-center mb-16">
-        <h2 ref={headingRef}n className="py-24 px-6 md:px-12 bg-white max-w-7xl mx-auto">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-5xl font-extrabold text-[#1A1A1A] mb-4">
+        <h2 ref={headingRef} className="text-3xl md:text-5xl font-extrabold text-[#1A1A1A] mb-4">
           Everything You Need to Manage Properties
         </h2>
         <p className="text-lg text-gray-500">Purpose-built features for the Nigerian rental market</p>
@@ -117,7 +117,7 @@ const Features: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {features.map((feature, index) => (
-          <FeatureCard key={index} {...feature} />
+          <FeatureCard key={index} index={index} {...feature} />
         ))}
       </div>
     </section>
