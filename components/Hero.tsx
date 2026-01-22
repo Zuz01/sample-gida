@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Play, MoveRight, Home, Key, Shield, Building2 } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface HeroProps {
   onCtaClick: () => void;
@@ -17,11 +19,67 @@ const FloatingIcon: React.FC<{ children: React.ReactNode; className?: string; de
   </div>
 );
 
+gsap.registerPlugin(ScrollTrigger);
+
 const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   const [showDemo, setShowDemo] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const checksRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    // Animate title
+    if (titleRef.current) {
+      gsap.from(titleRef.current.children, {
+        duration: 0.8,
+        y: 30,
+        opacity: 0,
+        stagger: 0.2,
+        ease: 'power2.out'
+      });
+    }
+
+    // Animate description
+    if (descRef.current) {
+      gsap.from(descRef.current, {
+        delay: 0.3,
+        duration: 0.8,
+        y: 20,
+        opacity: 0,
+        ease: 'power2.out'
+      });
+    }
+
+    // Animate buttons
+    if (buttonsRef.current) {
+      gsap.from(buttonsRef.current.children, {
+        delay: 0.5,
+        duration: 0.6,
+        y: 20,
+        opacity: 0,
+        stagger: 0.15,
+        ease: 'power2.out'
+      });
+    }
+
+    // Animate checks
+    if (checksRef.current) {
+      gsap.from(checksRef.current.children, {
+        delay: 0.7,
+        duration: 0.6,
+        opacity: 0,
+        stagger: 0.12,
+        ease: 'power2.out'
+      });
+    }
+  }, []);
 
   return (
-    <section className="relative py-20 md:py-32 px-6 md:px-12 flex flex-col items-center text-center max-w-full mx-auto overflow-hidden">
+    <section ref={sectionRef} className="relative py-20 md:py-32 px-6 md:px-12 flex flex-col items-center text-center max-w-full mx-auto overflow-hidden">
       {/* Background patterns as seen in design intent */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full opacity-[0.02]" 
@@ -59,17 +117,17 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
       </FloatingIcon>
 
       <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center">
-        <h1 className="text-[42px] sm:text-[64px] md:text-[84px] font-[800] text-[#2D2D2D] leading-[1.05] mb-8 md:mb-10 flex flex-col items-center tracking-tight">
+        <h1 ref={titleRef} className="text-[42px] sm:text-[64px] md:text-[84px] font-[800] text-[#2D2D2D] leading-[1.05] mb-8 md:mb-10 flex flex-col items-center tracking-tight">
           <span className="block">Property Management</span>
           <span className="text-[#E67E22] block">Made Simple</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-gray-500 max-w-3xl mb-12 md:mb-14 leading-relaxed font-medium">
+        <p ref={descRef} className="text-lg md:text-xl text-gray-500 max-w-3xl mb-12 md:mb-14 leading-relaxed font-medium">
           The all-in-one platform for Nigerian landlords to manage properties, 
           collect rent via Bank Transfer & Paystack, and track everything in real-time.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-16 md:mb-20 w-full sm:w-auto">
+        <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 mb-16 md:mb-20 w-full sm:w-auto">
           <button 
             onClick={onCtaClick}
             className="bg-[#E67E22] hover:bg-[#D35400] text-white px-10 py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-xl shadow-orange-200 active:scale-95 group"
@@ -85,7 +143,7 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           </button>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-16">
+        <div ref={checksRef} className="flex flex-wrap justify-center gap-8 md:gap-16 mb-16">
           <div className="flex items-center gap-2 text-gray-600 font-semibold">
             <CheckCircle2 className="text-[#27AE60]" size={22} />
             <span>No setup fees</span>
