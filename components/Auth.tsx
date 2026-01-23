@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
-import { Home, Chrome, Loader2, AlertCircle, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { supabase } from '../supabase';
+import { Home, Chrome, Loader2, AlertCircle, Mail, ArrowRight, CheckCircle2, Lock, User, KeyRound, Building2 } from 'lucide-react';
+import { auth, db } from '../firebase'; // Import from your new firebase.ts
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider 
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 interface AuthProps {
-  onBack: () => void;
-  onLoginSuccess: () => void;
+  onBack?: () => void;
+  onLoginSuccess?: () => void;
+  onLogin: (role: 'LANDLORD' | 'TENANT', hasProperty?: boolean) => void;
 }
 
-const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
+const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess, onLogin }) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false); // New State for Success Screen
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [role, setRole] = useState<'LANDLORD' | 'TENANT'>('LANDLORD');
 
   // Form State
   const [name, setName] = useState('');
@@ -22,11 +31,30 @@ const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) throw error;
+      setError(null);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user exists in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        // User exists, log them in
+        const userData = userDoc.data();
+        onLogin(userData.role, !!userData.unitId);
+      } else {
+        // New Google User -> Create default profile (Default to Tenant or ask)
+        // For simplicity in this flow, we default to Tenant if they sign in with Google first
+        await setDoc(userDocRef, {
+          email: user.email,
+          name: user.displayName || "Google User",
+          role: "TENANT", 
+          createdAt: new Date()
+        });
+        onLogin("TENANT", false);
+      }
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -41,58 +69,72 @@ const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
 
     try {
       if (mode === 'signup') {
-        // --- SIGN UP ---
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name } // Save name to Supabase Meta
-          }
-        });
-        if (error) throw error;
+        // --- SIGN UP (Firebase) ---
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        // Triggers the Success Screen instead of an alert
-        setShowSuccess(true); 
+        // Create User Document in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          name: name,
+          role: role,
+          createdAt: new Date(),
+          unitId: null // Initialize as null
+        });
+
+        // Redirect immediately (Firebase doesn't require email confirm by default)
+        onLogin(role, false);
+      
       } else {
-        // --- SIGN IN ---
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        // --- SIGN IN (Firebase) ---
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        // --- SYNC WITH BACKEND ---
-        if (data.user && data.session) {
-          try {
-            await fetch('http://localhost:3001/api/auth/sync', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${data.session.access_token}`
-              },
-              body: JSON.stringify({ name: name || 'Landlord' })
-            });
-          } catch (syncErr) {
-            console.warn("Backend sync warning (non-fatal):", syncErr);
-          }
-          onLoginSuccess();
+        // Fetch User Role from Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          throw new Error('User profile not found.');
         }
+
+        const userData = userDoc.data();
+
+        // Determine if they have a property (For redirection logic)
+        let hasProperty = false;
+
+        if (userData.role === 'LANDLORD') {
+          // Check if Landlord has created any properties in 'properties' collection
+          const q = query(collection(db, "properties"), where("landlordId", "==", user.uid));
+          const snapshot = await getDocs(q);
+          hasProperty = !snapshot.empty;
+        } else {
+          // Check if Tenant has a unitId linked
+          hasProperty = !!userData.unitId;
+        }
+
+        // Redirect logic
+        onLogin(userData.role, hasProperty);
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Authentication failed");
-    } finally {
+      // Friendly error messages
+      if (err.code === 'auth/invalid-credential') {
+        setError("Invalid email or password.");
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError("This email is already registered.");
+      } else {
+        setError(err.message);
+      }
       setLoading(false);
     }
   };
 
-  // --- RENDER: SUCCESS SCREEN (Email Confirmation) ---
+  // --- RENDER: SUCCESS SCREEN (Optional - Kept for structure) ---
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-[#FDFDFD] flex flex-col items-center justify-center px-4 py-12 animate-in fade-in duration-500">
         <div className="bg-white w-full max-w-lg rounded-[32px] shadow-2xl shadow-gray-200/50 border border-gray-100 p-8 md:p-12 text-center">
-          
-          {/* Animated Icon */}
           <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner relative">
             <div className="absolute inset-0 rounded-full border-2 border-orange-100 animate-ping opacity-20"></div>
             <Mail size={40} className="text-[#E67E22]" />
@@ -100,17 +142,11 @@ const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
               <CheckCircle2 size={14} className="text-white" />
             </div>
           </div>
-
           <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4">Check your inbox</h2>
           <p className="text-gray-500 text-lg mb-8 leading-relaxed">
             We've sent a confirmation link to <br/>
             <span className="font-bold text-gray-900">{email}</span>.
           </p>
-          
-          <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm mb-8 font-medium">
-            Please click the link in the email to activate your account and sign in.
-          </div>
-
           <button 
             onClick={() => {
               setShowSuccess(false);
@@ -122,10 +158,6 @@ const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
             Back to Sign In
             <ArrowRight size={20} />
           </button>
-
-          <p className="mt-8 text-sm text-gray-400">
-            Didn't receive the email? <button className="text-[#E67E22] font-bold hover:underline">Click to resend</button>
-          </p>
         </div>
       </div>
     );
@@ -200,53 +232,56 @@ const Auth: React.FC<AuthProps> = ({ onBack, onLoginSuccess }) => {
           </button>
         </div>
 
+        {/* Role Toggle Switch (Only on Signup) */}
+        {mode === 'signup' && (
+          <div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8 relative">
+            <button 
+              type="button"
+              onClick={() => setRole('LANDLORD')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all z-10 ${role === 'LANDLORD' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <Building2 size={16}/> Landlord
+            </button>
+            <button 
+              type="button"
+              onClick={() => setRole('TENANT')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all z-10 ${role === 'TENANT' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <User size={16}/> Tenant
+            </button>
+          </div>
+        )}
+
         {/* Form Fields */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'signup' && (
-            <div className="space-y-2 animate-in slide-in-from-top-4 fade-in duration-300">
-              <label className="text-sm font-bold text-gray-800 ml-1">Full Name</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Kamau"
-                className="w-full bg-[#F9FAFB] border border-gray-100 rounded-2xl py-4 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all font-medium"
-                required
-              />
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-2">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input required type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 font-bold text-gray-900 outline-none focus:ring-2 focus:ring-orange-100 transition-all"/>
+              </div>
             </div>
           )}
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-800 ml-1">Email</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="landlord@example.com"
-              className="w-full bg-[#F9FAFB] border border-gray-100 rounded-2xl py-4 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all font-medium"
-              required
-            />
-          </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-800 ml-1">Password</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-[#F9FAFB] border border-gray-100 rounded-2xl py-4 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all font-medium"
-              required
-            />
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input required type="email" placeholder="hello@gidana.ng" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 font-bold text-gray-900 outline-none focus:ring-2 focus:ring-orange-100 transition-all"/>
+            </div>
           </div>
 
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-orange-100 transition-all mt-4 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading && <Loader2 className="animate-spin" size={20} />}
-            {mode === 'signin' ? 'Sign In' : 'Create Account'}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-2">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 font-bold text-gray-900 outline-none focus:ring-2 focus:ring-orange-100 transition-all"/>
+            </div>
+          </div>
+
+          <button disabled={loading} type="submit" className="w-full bg-[#E67E22] text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-orange-200 hover:bg-[#D35400] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+            {loading ? <Loader2 className="animate-spin" /> : (mode === 'signin' ? <><KeyRound size={20}/> Sign In</> : 'Create Account')}
           </button>
         </form>
       </div>

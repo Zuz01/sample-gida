@@ -1,44 +1,34 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { Star } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// --- Data (Moved out for easier editing) ---
+const TESTIMONIALS_DATA = [
+  {
+    quote: "GidaNa has transformed how I manage my 3 apartment buildings. The real-time payment tracking is a game changer.",
+    name: "Emeka Obi",
+    location: "Property Owner, Lagos"
+  },
+  {
+    quote: "Finally, a property management system designed for how we do business in Nigeria. The payment integration will be incredible.",
+    name: "Funke Adebayo",
+    location: "Landlord, Abuja"
+  }
+];
+
 interface TestimonialCardProps {
   quote: string;
   name: string;
   location: string;
+  index: number;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps & { index: number }> = ({ quote, name, location, index }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-
-    gsap.fromTo(cardRef.current,
-      {
-        x: index === 0 ? -50 : 50,
-        opacity: 0
-      },
-      {
-        scrollTrigger: {
-          trigger: cardRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-        },
-        duration: 0.6,
-        x: 0,
-        opacity: 1,
-        ease: 'power2.out',
-        clearProps: 'transform,opacity'
-      }
-    );
-  }, [index]);
-
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, name, location, index }) => {
   return (
-    <div ref={cardRef} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-6">
+    <div className="testimonial-card bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-6 opacity-0 translate-y-8">
       <div className="flex gap-1">
         {[...Array(5)].map((_, i) => (
           <Star key={i} size={18} fill="#F39C12" stroke="#F39C12" />
@@ -54,53 +44,67 @@ const TestimonialCard: React.FC<TestimonialCardProps & { index: number }> = ({ q
 };
 
 const Testimonials: React.FC = () => {
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!headingRef.current) return;
+  // Use useLayoutEffect for GSAP to prevent flash of unstyled content
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      
+      // Animate Heading
+      gsap.fromTo(".testimonial-heading",
+        { y: 30, opacity: 0 },
+        {
+          scrollTrigger: {
+            trigger: ".testimonial-heading",
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+          },
+          duration: 0.8,
+          y: 0,
+          opacity: 1,
+          ease: 'power2.out',
+        }
+      );
 
-    gsap.fromTo(headingRef.current,
-      {
-        y: 30,
-        opacity: 0
-      },
-      {
-        scrollTrigger: {
-          trigger: headingRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-        },
-        duration: 0.8,
-        y: 0,
-        opacity: 1,
-        ease: 'power2.out',
-        clearProps: 'transform,opacity'
-      }
-    );
+      // Animate Cards Staggered
+      gsap.fromTo(".testimonial-card",
+        { y: 50, opacity: 0 },
+        {
+          scrollTrigger: {
+            trigger: ".testimonial-grid",
+            start: 'top 75%',
+            toggleActions: 'play none none none',
+          },
+          duration: 0.8,
+          y: 0,
+          opacity: 1,
+          stagger: 0.2, // Adds a nice delay between cards
+          ease: 'power2.out',
+        }
+      );
+
+    }, containerRef); // Scope everything to this component
+
+    return () => ctx.revert(); // Cleanup automatically
   }, []);
 
   return (
-    <section className="py-24 px-6 md:px-12 bg-[#F8F9FA]">
+    <section ref={containerRef} className="py-24 px-6 md:px-12 bg-[#F8F9FA]">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 ref={headingRef} className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] mb-4">
+          <h2 className="testimonial-heading text-3xl md:text-4xl font-extrabold text-[#1A1A1A] mb-4 opacity-0">
             Trusted by Landlords Across Nigeria
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <TestimonialCard 
-            quote="GidaNa has transformed how I manage my 3 apartment buildings. The real-time payment tracking is a game changer."
-            name="Emeka Obi"
-            location="Property Owner, Lagos"
-            index={0}
-          />
-          <TestimonialCard 
-            quote="Finally, a property management system designed for how we do business in Nigeria. The payment integration will be incredible."
-            name="Funke Adebayo"
-            location="Landlord, Abuja"
-            index={1}
-          />
+        <div className="testimonial-grid grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {TESTIMONIALS_DATA.map((item, index) => (
+            <TestimonialCard 
+              key={index}
+              {...item}
+              index={index}
+            />
+          ))}
         </div>
       </div>
     </section>

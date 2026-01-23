@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Play, MoveRight, Home, Key, Shield, Building2 } from 'lucide-react';
+import { CheckCircle2, Play, MoveRight, Home, Key, Shield, Building2, Wrench } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -107,7 +106,7 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
   return (
     <section ref={sectionRef} className="relative py-20 md:py-32 px-6 md:px-12 flex flex-col items-center text-center max-w-full mx-auto overflow-hidden">
-      {/* Background patterns as seen in design intent */}
+      {/* Background patterns */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full opacity-[0.02]" 
              style={{ 
@@ -133,7 +132,8 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
       <FloatingIcon className="bottom-[15%] left-[12%]" delay="1.5s">
         <div className="p-5 bg-white rounded-[24px] shadow-2xl border border-gray-50 rotate-[8deg] hover:rotate-0 hover:scale-110 transition-all pointer-events-auto cursor-help text-[#008751]">
-          <Building2 size={38} strokeWidth={1.5} />
+          {/* Swapped Building for Wrench to represent Tenant Maintenance */}
+          <Wrench size={38} strokeWidth={1.5} />
         </div>
       </FloatingIcon>
 
@@ -145,13 +145,13 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
       <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center">
         <h1 ref={titleRef} className="text-[42px] sm:text-[64px] md:text-[84px] font-[800] text-[#2D2D2D] leading-[1.05] mb-8 md:mb-10 flex flex-col items-center tracking-tight">
-          <span className="block">Property Management</span>
-          <span className="text-[#E67E22] block">Made Simple</span>
+          <span className="block">Manage Properties.</span>
+          <span className="text-[#E67E22] block">Empower Tenants.</span>
         </h1>
         
         <p ref={descRef} className="text-lg md:text-xl text-gray-500 max-w-3xl mb-12 md:mb-14 leading-relaxed font-medium">
-          The all-in-one platform for Nigerian landlords to manage properties, 
-          collect rent via Bank Transfer & Paystack, and track everything in real-time.
+          The complete platform for Nigeria's housing sector. Landlords automate rent collection 
+          while tenants enjoy seamless payments and instant maintenance requests.
         </p>
 
         <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 mb-16 md:mb-20 w-full sm:w-auto">
@@ -159,29 +159,29 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
             onClick={onCtaClick}
             className="bg-[#E67E22] hover:bg-[#D35400] text-white px-10 py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-xl shadow-orange-200 active:scale-95 group"
           >
-            Start Free Trial
+            Get Started
             <MoveRight size={22} className="group-hover:translate-x-1 transition-transform" />
           </button>
           <button 
             onClick={() => setShowDemo(!showDemo)}
             className="bg-white border border-gray-200 text-[#2D2D2D] px-10 py-5 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2 active:scale-95"
           >
-            {showDemo ? 'Hide Demo' : 'Watch Demo'}
+            {showDemo ? 'Hide Demo' : 'See How It Works'}
           </button>
         </div>
 
         <div ref={checksRef} className="flex flex-wrap justify-center gap-8 md:gap-16 mb-16">
           <div className="flex items-center gap-2 text-gray-600 font-semibold">
             <CheckCircle2 className="text-[#27AE60]" size={22} />
-            <span>No setup fees</span>
+            <span>Automated Rent</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600 font-semibold">
             <CheckCircle2 className="text-[#27AE60]" size={22} />
-            <span>14-day free trial</span>
+            <span>Easy Maintenance Requests</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600 font-semibold">
             <CheckCircle2 className="text-[#27AE60]" size={22} />
-            <span>Cancel anytime</span>
+            <span>Transparent for Everyone</span>
           </div>
         </div>
 
@@ -199,7 +199,7 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               </div>
               <div className="bg-white px-8 py-1.5 rounded-xl text-xs text-gray-400 font-semibold mx-auto border border-gray-100 shadow-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                gidana.ng/landlord/dashboard
+                gidana.ng/app
               </div>
             </div>
             <div className="relative aspect-[16/10] bg-gray-50 rounded-b-2xl overflow-hidden">
