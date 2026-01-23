@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Play, MoveRight, Home, Key, Shield, Building2, Wrench } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import video from '../gidana.gif';
 
 interface HeroProps {
   onCtaClick: () => void;
@@ -203,11 +204,7 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               </div>
             </div>
             <div className="relative aspect-[16/10] bg-gray-50 rounded-b-2xl overflow-hidden">
-              <img 
-                src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHRydjZpYnljMGtkYzh6am4yazRybW5qMXZrdTV6bjVremZ3azR6eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKVUn7iM8FMEU24/giphy.gif" 
-                alt="Dashboard View"
-                className="w-full h-full object-cover opacity-90"
-              />
+              (<img src={video} alt="Dashboard View" className="w-full h-full object-cover opacity-90" />)
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
             </div>
           </div>

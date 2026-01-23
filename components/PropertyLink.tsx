@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Home, CheckCircle2, AlertCircle, Loader2, ArrowRight, LogOut, Building2, MapPin } from 'lucide-react';
 import { db, auth } from '../firebase';
-import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 
 interface Unit {
@@ -15,6 +15,7 @@ interface Property {
   id: string;
   name: string;
   address: string;
+  landlordId: string;
   units: Unit[];
 }
 
@@ -30,6 +31,7 @@ const PropertyLink: React.FC<{ onLinkSuccess: () => void }> = ({ onLinkSuccess }
   const handleLogout = async () => {
     await signOut(auth);
     // The onAuthStateChanged listener in App.tsx will automatically redirect to Home
+    window.location.reload(); 
   };
 
   // --- Step 1: Find Property by Unique Code (Firebase) ---
@@ -62,6 +64,7 @@ const PropertyLink: React.FC<{ onLinkSuccess: () => void }> = ({ onLinkSuccess }
           id: propDoc.id,
           name: propData.name,
           address: propData.address,
+          landlordId: propData.landlordId,
           units: loadedUnits
         });
         
@@ -79,7 +82,7 @@ const PropertyLink: React.FC<{ onLinkSuccess: () => void }> = ({ onLinkSuccess }
 
   // --- Step 2: Claim a Vacant Unit (Firebase) ---
   const handleClaimUnit = async () => {
-    if (!selectedUnitId || !auth.currentUser) return;
+    if (!selectedUnitId || !auth.currentUser || !foundProperty) return;
     setLoading(true);
 
     try {
@@ -107,7 +110,21 @@ const PropertyLink: React.FC<{ onLinkSuccess: () => void }> = ({ onLinkSuccess }
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         unitId: selectedUnitId,
-        role: 'TENANT' // Ensure role is set
+        propertyId: foundProperty.id,
+        role: 'TENANT'
+      });
+
+      // 4. Create Tenant Record for Landlord's List
+      await addDoc(collection(db, "tenants"), {
+        landlordId: foundProperty.landlordId,
+        propertyId: foundProperty.id,
+        unitId: selectedUnitId,
+        userId: user.uid,
+        name: user.displayName || 'New Tenant',
+        email: user.email,
+        phoneNumber: 'N/A',
+        status: 'Active',
+        createdAt: new Date().toISOString()
       });
 
       onLinkSuccess(); // Redirect to Dashboard

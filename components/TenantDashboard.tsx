@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, CreditCard, Wrench, Settings as SettingsIcon, 
-  LogOut, Menu, X, Bell, User, Calendar, CheckCircle2, 
-  AlertCircle, Clock, ChevronRight, FileText, Download, Plus,
-  Home, MapPin, Phone, Mail, Check, Loader2, ArrowLeft
+  LogOut, Menu, X, Bell, CheckCircle2, 
+  ChevronRight, Download, Plus,
+  Home, MapPin, Phone, Check, Loader2, ArrowLeft, Calendar // <--- Added Calendar here
 } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { 
@@ -50,15 +50,16 @@ const SidebarItem: React.FC<{
   icon: React.ReactNode; 
   label: string; 
   active?: boolean; 
-  onClick?: () => void 
-}> = ({ icon, label, active, onClick }) => (
+  onClick?: () => void;
+  className?: string;
+}> = ({ icon, label, active, onClick, className }) => (
   <div 
     onClick={onClick}
     className={`flex items-center gap-3 cursor-pointer transition-all rounded-xl mb-1 px-4 py-3.5 ${
       active 
         ? 'bg-[#E67E22] text-white shadow-lg shadow-orange-900/20 font-bold' 
         : 'text-gray-400 hover:text-white hover:bg-white/5 font-medium'
-    }`}
+    } ${className}`}
   >
     <div className="shrink-0">{icon}</div>
     <span className="text-sm whitespace-nowrap">{label}</span>
@@ -127,7 +128,7 @@ const TenantDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     reference: (new Date()).getTime().toString(),
     email: tenant?.email || "",
     amount: (tenant?.rentAmount || 0) * 100, 
-    publicKey: 'pk_test_361743acb45172e313d9f2d9c82f1488809a6d55',
+    publicKey: 'pk_test_361743acb45172e313d9f2d9c82f1488809a6d55', // Replace with your public key
   };
 
   const initializePayment = usePaystackPayment(config);
@@ -449,7 +450,7 @@ const TenantDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     return <div className="h-screen flex items-center justify-center text-[#E67E22]"><Loader2 className="animate-spin" size={40}/></div>;
   }
 
-  // --- SAFETY NAV FOR NO UNIT STATE ---
+  // --- SAFETY NAV: IF NO TENANT DATA (e.g., stuck after signup) ---
   if (!tenant) {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-gray-500 space-y-4">
@@ -464,6 +465,8 @@ const TenantDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     );
   }
 
+  
+
   return (
     <div className="flex h-screen bg-[#FDFDFD] font-sans overflow-hidden">
       {/* Sidebar */}
@@ -477,13 +480,13 @@ const TenantDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         </div>
         
         <nav className="space-y-1 flex-1">
-          {/* Added Home Navigation that triggers Logout/Return */}
+          {/* --- NEW: BACK TO WEBSITE BUTTON --- */}
           <SidebarItem 
-            icon={<Home size={20}/>} 
+            icon={<ArrowLeft size={20}/>} 
             label="Back to Website" 
             onClick={onLogout} 
+            className="text-[#E67E22] hover:bg-white/10 mb-4"
           />
-          <div className="my-4 border-t border-white/10"></div>
           
           <SidebarItem icon={<LayoutDashboard size={20}/>} label="Overview" active={activeTab === 'Overview'} onClick={() => {setActiveTab('Overview'); setIsMobileSidebarOpen(false);}} />
           <SidebarItem icon={<CreditCard size={20}/>} label="Payments" active={activeTab === 'Payments'} onClick={() => {setActiveTab('Payments'); setIsMobileSidebarOpen(false);}} />
@@ -503,11 +506,21 @@ const TenantDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         {/* Header */}
         <header className="h-24 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 z-40">
           <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-2 bg-gray-50 rounded-xl text-gray-600"><Menu size={24}/></button>
+          
+          {/* Header Actions */}
           <div className="ml-auto flex items-center gap-6">
+            <button 
+              onClick={onLogout}
+              className="hidden sm:flex items-center gap-2 text-gray-400 hover:text-[#E67E22] transition-colors text-sm font-bold"
+            >
+              <Home size={18} /> Home
+            </button>
+
             <button className="relative p-2 text-gray-400 hover:text-[#E67E22] transition-colors">
               <Bell size={24}/>
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
+            
             <div className="flex items-center gap-3 pl-6 border-l border-gray-100 relative">
               <div 
                 className="flex items-center gap-3 cursor-pointer"
