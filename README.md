@@ -16,13 +16,13 @@ Here is a comprehensive **README.md** file for your project. You can copy and pa
 - **Tenant Linking Codes:** Automatically generate unique 4-digit codes (e.g., `GIDA-4829`) for tenants to link to their units.
 - **Financial Reports:** Real-time revenue tracking and occupancy rates.
 - **Maintenance Tracking:** Receive and manage maintenance requests from tenants.
-- **Lease Management:** Track lease start/end dates and status.
+- **Lease Management:** Track lease start / end dates and status.
 
 ### 👤 For Tenants
 
 - **Easy Onboarding:** Link to a unit instantly using a Property Code.
 - **Rent Payments:** Secure, real-time rent payments using **Paystack** (Card, Bank Transfer, USSD).
-- **Maintenance Requests:** Report issues (e.g., broken pipes) directly to the landlord with priority levels.
+- **Maintenance Requests:** Report issues (e.g., broken pipes, leaking toilets) directly to the landlord with priority levels.
 - **Payment History:** View a complete history of all rent payments.
 
 ---
@@ -123,7 +123,7 @@ Open your browser to `http://localhost:5173` (or the port shown in your terminal
 
 ### The Landlord Flow
 
-1. **Sign Up:** Create an account and select "Landlord".
+1. **Sign Up:** Create an account and select "Landlord" from the options.
 2. **Add Property:** Go to the Properties tab and add a new property.
 3. **Get Code:** Note the generated code (e.g., `GIDA-1234`) displayed on the property card.
 4. **Add Units:** Create units under that property and set the rent price.
@@ -131,7 +131,7 @@ Open your browser to `http://localhost:5173` (or the port shown in your terminal
 ### The Tenant Flow
 
 1. **Sign Up:** Create an account and select "Tenant".
-2. **Link Property:** You will be prompted to enter a **Property Code**. Enter the code provided by the Landlord.
+2. **Link Property:** You will be prompted to enter a **Property Code**. Enter the code provided by the Landlord ( eg., GIDA-1234 ).
 3. **Select Unit:** Choose your specific unit from the list.
 4. **Dashboard:** You can now see your rent due, pay via Paystack, or make maintenance requests.
 
