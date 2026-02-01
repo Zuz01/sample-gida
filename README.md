@@ -33,6 +33,12 @@ While tailored for the Nigerian real estate ecosystem, GidaNa is designed with f
 
 ---
 
+## 🎯 Project Vision
+
+GidaNa aims to simplify property management across Nigeria by providing an affordable, transparent, and easy-to-use digital platform for both landlords and tenants.
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Frontend:** React (Vite), TypeScript
