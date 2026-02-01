@@ -1,4 +1,4 @@
-Here is a comprehensive **README.md** file for your project. You can copy and paste this directly into the root of your project folder.
+Here is a comprehensive **README.md** file for project GidaNa.
 ---
 
 # 🏠 GidaNa - Property Management System
