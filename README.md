@@ -1,5 +1,4 @@
 Here is a comprehensive **README.md** file for your project. You can copy and paste this directly into the root of your project folder.
-
 ---
 
 # 🏠 GidaNa - Property Management System
@@ -30,6 +29,7 @@ Here is a comprehensive **README.md** file for your project. You can copy and pa
 ## 📌 Project Status
 
 GidaNa is currently under active development. Core property and tenant management features are functional, with ongoing improvements to reporting, notifications, and performance.
+While tailored for the Nigerian real estate ecosystem, GidaNa is designed with flexibility to support broader property management use cases.
 
 ---
 
